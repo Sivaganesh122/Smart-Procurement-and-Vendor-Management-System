@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login | Smart Procurement</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<div class="login-page">
+    <section class="login-brand">
+        <div class="login-brand-inner">
+            <div class="brand-row">
+                <span class="brand-mark">SP</span>
+                <div>
+                    <h1 style="font-size:17px;margin:0;">Smart Procurement</h1>
+                    <p style="margin:4px 0 0;">Vendor Management System</p>
+                </div>
+            </div>
+            <h1>Smarter procurement.<br>Better vendor management.</h1>
+            <p>Manage vendors, requisitions, purchase orders and approvals from one simple procurement workspace.</p>
+            <div class="login-features">
+                <div class="login-feature">✓ Centralized vendor management</div>
+                <div class="login-feature">✓ Requisition and purchase order workflow</div>
+                <div class="login-feature">✓ Role-based access and approvals</div>
+            </div>
+        </div>
+    </section>
+
+    <section class="login-panel">
+        <div class="login-card">
+            <h2>Welcome back</h2>
+            <p>Sign in to access your procurement dashboard.</p>
+
+            <div th:if="${param.error}" class="alert alert-error">Invalid username or password.</div>
+            <div th:if="${param.logout}" class="alert alert-info">You have been logged out successfully.</div>
+
+            <form action="/login" method="post">
+                <div class="field">
+                    <label for="username">Username</label>
+                    <input id="username" type="text" name="username" placeholder="Enter username" required>
+                </div>
+                <div class="field">
+                    <label for="password">Password</label>
+                    <input id="password" type="password" name="password" placeholder="Enter password" required>
+                </div>
+                <button class="btn btn-primary" type="submit">Sign In →</button>
+            </form>
+
+            <div class="footer-note">Smart Procurement & Vendor Management System</div>
+        </div>
+    </section>
+</div>
+</body>
+</html>

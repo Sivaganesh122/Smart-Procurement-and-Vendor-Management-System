@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard | Smart Procurement</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<div class="app-shell">
+    <aside class="sidebar">
+        <div class="brand">
+            <div class="brand-row">
+                <span class="brand-mark">SP</span>
+                <div><h1>Smart Procurement</h1><p>Vendor Management System</p></div>
+            </div>
+        </div>
+        <nav class="nav">
+            <a class="active" th:href="@{/dashboard}"><span class="nav-icon">⌂</span><span class="nav-text">Dashboard</span></a>
+            <a sec:authorize="hasAnyRole('ADMIN','PROCUREMENT_MANAGER')" th:href="@{/vendor}"><span class="nav-icon">▣</span><span class="nav-text">Vendors</span></a>
+            <a sec:authorize="hasAnyRole('ADMIN','EMPLOYEE','PROCUREMENT_MANAGER')" th:href="@{/requisition}"><span class="nav-icon">☷</span><span class="nav-text">Requisitions</span></a>
+            <a sec:authorize="hasAnyRole('ADMIN','PROCUREMENT_MANAGER')" th:href="@{/purchase-order}"><span class="nav-icon">▤</span><span class="nav-text">Purchase Orders</span></a>
+            <a sec:authorize="hasAnyRole('ADMIN','PROCUREMENT_MANAGER')" th:href="@{/approval}"><span class="nav-icon">✓</span><span class="nav-text">Approvals</span></a>
+        </nav>
+        <div class="sidebar-bottom">
+            <div class="user-mini">
+                <strong sec:authentication="name">User</strong>
+                <span>Signed in</span>
+            </div>
+            <form th:action="@{/logout}" method="post">
+                <button class="btn btn-secondary" style="width:100%;justify-content:center;" type="submit">Logout</button>
+            </form>
+        </div>
+    </aside>
+
+    <main class="main">
+        <header class="topbar">
+            <div><h2>Dashboard</h2><small>Procurement overview</small></div>
+            <small>Role-based workspace</small>
+        </header>
+
+        <div class="content">
+            <section class="hero">
+                <h2>Welcome, <span sec:authentication="name">User</span> 👋</h2>
+                <p>Manage your procurement activities from one centralized workspace.</p>
+            </section>
+
+            <div class="grid">
+                <div class="card stat-card" sec:authorize="hasAnyRole('ADMIN','PROCUREMENT_MANAGER')">
+                    <div class="stat-label">Vendors</div>
+                    <div class="stat-value" th:text="${vendorCount != null ? vendorCount : 0}">0</div>
+                    <div class="stat-note">Suppliers registered</div>
+                </div>
+                <div class="card stat-card" sec:authorize="hasAnyRole('ADMIN','EMPLOYEE','PROCUREMENT_MANAGER')">
+                    <div class="stat-label">Requisitions</div>
+                    <div class="stat-value" th:text="${requisitionCount != null ? requisitionCount : 0}">0</div>
+                    <div class="stat-note">Procurement requests</div>
+                </div>
+                <div class="card stat-card" sec:authorize="hasAnyRole('ADMIN','PROCUREMENT_MANAGER')">
+                    <div class="stat-label">Purchase Orders</div>
+                    <div class="stat-value" th:text="${poCount != null ? poCount : 0}">0</div>
+                    <div class="stat-note">Orders generated</div>
+                </div>
+                <div class="card stat-card" sec:authorize="hasAnyRole('ADMIN','PROCUREMENT_MANAGER')">
+                    <div class="stat-label">Pending Approvals</div>
+                    <div class="stat-value" th:text="${pendingApprovalCount != null ? pendingApprovalCount : 0}">0</div>
+                    <div class="stat-note">Awaiting review</div>
+                </div>
+                <div class="card stat-card" sec:authorize="hasRole('EMPLOYEE')">
+                    <div class="stat-label">My Role</div>
+                    <div class="stat-value">Employee</div>
+                    <div class="stat-note">Requisition access only</div>
+                </div>
+            </div>
+
+            <div class="section-head" style="margin-top:30px;">
+                <h3>Procurement Modules</h3>
+                <span class="muted">Quick access</span>
+            </div>
+
+            <div class="module-grid">
+                <a class="card module-card" sec:authorize="hasAnyRole('ADMIN','PROCUREMENT_MANAGER')" th:href="@{/vendor}">
+                    <div class="module-icon">▣</div>
+                    <h3>Vendor Management</h3>
+                    <p>Add, view and manage vendor records. Generate vendor reports in PDF or Excel.</p>
+                </a>
+                <a class="card module-card" sec:authorize="hasAnyRole('ADMIN','EMPLOYEE','PROCUREMENT_MANAGER')" th:href="@{/requisition}">
+                    <div class="module-icon">☷</div>
+                    <h3>Requisitions</h3>
+                    <p>Create procurement requisitions and monitor their current status.</p>
+                </a>
+                <a class="card module-card" sec:authorize="hasAnyRole('ADMIN','PROCUREMENT_MANAGER')" th:href="@{/purchase-order}">
+                    <div class="module-icon">▤</div>
+                    <h3>Purchase Orders</h3>
+                    <p>Create purchase orders and track their workflow status.</p>
+                </a>
+                <a class="card module-card" sec:authorize="hasAnyRole('ADMIN','PROCUREMENT_MANAGER')" th:href="@{/approval}">
+                    <div class="module-icon">✓</div>
+                    <h3>Approvals</h3>
+                    <p>Review procurement approvals and approve or reject requests.</p>
+                </a>
+            </div>
+        </div>
+    </main>
+</div>
+</body>
+</html>

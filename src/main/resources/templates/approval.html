@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Approvals | Smart Procurement</title><link rel="stylesheet" th:href="@{/css/style.css}"></head>
+<body><div class="app-shell">
+<aside class="sidebar"><div class="brand"><div class="brand-row"><span class="brand-mark">SP</span><div><h1>Smart Procurement</h1><p>Vendor Management System</p></div></div></div>
+<nav class="nav">
+    <a th:href="@{/dashboard}"><span class="nav-icon">⌂</span><span class="nav-text">Dashboard</span></a>
+    <a sec:authorize="hasAnyRole('ADMIN','PROCUREMENT_MANAGER')" th:href="@{/vendor}"><span class="nav-icon">▣</span><span class="nav-text">Vendors</span></a>
+    <a sec:authorize="hasAnyRole('ADMIN','EMPLOYEE','PROCUREMENT_MANAGER')" th:href="@{/requisition}"><span class="nav-icon">☷</span><span class="nav-text">Requisitions</span></a>
+    <a sec:authorize="hasAnyRole('ADMIN','PROCUREMENT_MANAGER')" th:href="@{/purchase-order}"><span class="nav-icon">▤</span><span class="nav-text">Purchase Orders</span></a>
+    <a class="active" sec:authorize="hasAnyRole('ADMIN','PROCUREMENT_MANAGER')" th:href="@{/approval}"><span class="nav-icon">✓</span><span class="nav-text">Approvals</span></a>
+</nav>
+<div class="sidebar-bottom">
+    <div class="user-mini">
+        <strong sec:authentication="name">User</strong>
+        <span>Signed in</span>
+    </div>
+    <form th:action="@{/logout}" method="post"><button class="btn btn-secondary" style="width:100%;justify-content:center;">Logout</button></form>
+</div>
+</aside>
+<main class="main"><header class="topbar"><div><h2>Approvals</h2><small>Review procurement requests</small></div><a class="btn btn-secondary" th:href="@{/dashboard}">← Dashboard</a></header>
+<div class="content"><div class="page-head"><h2>Approval Center</h2><p>Review requisitions and purchase orders, supply feedback or rejection notes, and track approval status.</p></div>
+<div class="section-head"><h3>All Approvals</h3><span class="muted" th:text="${#lists.size(approvals)} + ' approval(s)'">0 approvals</span></div>
+<div class="card table-card"><div class="table-wrap"><table>
+<thead>
+    <tr>
+        <th>ID</th>
+        <th>Type & Reference</th>
+        <th>Requester / Supplier</th>
+        <th>Status</th>
+        <th>Approver</th>
+        <th>Comments / Reason</th>
+        <th>Action Date</th>
+        <th>Decision / Action</th>
+    </tr>
+</thead>
+<tbody>
+<tr th:each="app : ${approvals}">
+    <td th:text="${app.id}">1</td>
+    <td>
+        <div th:if="${app.requisition != null}">
+            <span class="badge" style="background:#e0e7ff; color:#3730a3; margin-bottom:4px;">Requisition</span>
+            <div><strong th:text="${app.requisition.requisitionNumber}">REQ</strong></div>
+        </div>
+        <div th:if="${app.purchaseOrder != null}">
+            <span class="badge" style="background:#fef3c7; color:#92400e; margin-bottom:4px;">Purchase Order</span>
+            <div><strong th:text="${app.purchaseOrder.poNumber}">PO</strong></div>
+        </div>
+        <span th:if="${app.requisition == null and app.purchaseOrder == null}" class="muted">General</span>
+    </td>
+    <td>
+        <div th:if="${app.requisition != null and app.requisition.requestedBy != null}">
+            <strong th:text="${app.requisition.requestedBy.fullName != null ? app.requisition.requestedBy.fullName : app.requisition.requestedBy.username}">User</strong>
+            <div class="muted" style="font-size:11px;" th:text="${app.requisition.requestedBy.email}"></div>
+        </div>
+        <div th:if="${app.purchaseOrder != null and app.purchaseOrder.vendor != null}">
+            <strong th:text="${app.purchaseOrder.vendor.name}">Vendor</strong>
+            <div class="muted" style="font-size:11px;" th:text="${app.purchaseOrder.vendor.contactNumber != null ? app.purchaseOrder.vendor.contactNumber : (app.purchaseOrder.vendor.email != null ? app.purchaseOrder.vendor.email : '')}"></div>
+        </div>
+        <span th:if="${(app.requisition == null or app.requisition.requestedBy == null) and (app.purchaseOrder == null or app.purchaseOrder.vendor == null)}" class="muted">-</span>
+    </td>
+    <td>
+        <span class="badge"
+              th:classappend="${app.status == 'APPROVED'} ? ' badge-approved' : (${app.status == 'REJECTED'} ? ' badge-rejected' : ' badge-pending')"
+              th:text="${app.status}">PENDING</span>
+    </td>
+    <td>
+        <span th:if="${app.approver != null}" th:text="${app.approver.fullName != null ? app.approver.fullName : app.approver.username}">Approver</span>
+        <span th:if="${app.approver == null}" class="muted">-</span>
+    </td>
+    <td>
+        <span th:text="${app.comments != null ? app.comments : '-'}">-</span>
+    </td>
+    <td>
+        <span th:text="${app.approvedAt != null ? #temporals.format(app.approvedAt, 'yyyy-MM-dd HH:mm') : '-'}">-</span>
+    </td>
+    <td>
+        <div th:if="${app.status == 'PENDING'}">
+            <form th:action="@{/approval/update}" method="post" style="display:flex; flex-direction:column; gap:6px;">
+                <input type="hidden" name="id" th:value="${app.id}">
+                <input type="text" name="comments" placeholder="Comments / reason" style="padding:6px 10px; font-size:12px; border-radius:8px; border:1px solid #cbd5e1; width:100%; min-width:130px;">
+                <div style="display:flex; gap:6px;">
+                    <button class="btn btn-success" type="submit" name="status" value="APPROVED" style="padding:6px 10px; font-size:12px;">✓ Approve</button>
+                    <button class="btn btn-danger" type="submit" name="status" value="REJECTED" style="padding:6px 10px; font-size:12px;">✕ Reject</button>
+                </div>
+            </form>
+        </div>
+        <div th:if="${app.status != 'PENDING'}">
+            <span class="muted" style="font-size:12px;">Completed</span>
+        </div>
+    </td>
+</tr>
+<tr th:if="${#lists.isEmpty(approvals)}"><td colspan="8" class="empty">No approvals available.</td></tr>
+</tbody></table></div></div>
+</div></main></div></body></html>

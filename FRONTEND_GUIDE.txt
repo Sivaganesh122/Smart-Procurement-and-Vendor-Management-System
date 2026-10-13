@@ -1,0 +1,63 @@
+SMART PROCUREMENT - FRONTEND UPDATE
+====================================
+
+What was changed
+-----------------
+- Added a professional responsive CSS theme under src/main/resources/static/css/style.css
+- Redesigned login page
+- Redesigned dashboard with sidebar, role-aware modules and cards
+- Redesigned Vendor Management page
+- Redesigned Requisition page
+- Redesigned Purchase Order page
+- Redesigned Approval page
+- Kept existing Spring Boot, Thymeleaf, security, database and controller URLs
+- Changed logout links to POST forms for Spring Security compatibility
+- Corrected Vendor phone field to the entity property: contactNumber
+
+How to run in VS Code
+---------------------
+1. Extract this ZIP.
+2. Open the project root folder (the folder containing pom.xml) in VS Code.
+3. Open Terminal -> New Terminal.
+4. Check Java:
+   java -version
+5. Run:
+   mvn spring-boot:run
+6. Open Chrome:
+   http://localhost:8083/login
+
+Important database setting
+--------------------------
+The existing application.properties uses:
+  database: procurement_db
+  username: root
+  password: Harsh
+
+If your MySQL password is different, change spring.datasource.password in:
+  src/main/resources/application.properties
+
+Default demo logins
+-------------------
+ADMIN:
+  username: admin
+  password: admin123
+
+MANAGER:
+  username: manager
+  password: manager123
+
+EMPLOYEE:
+  username: employee
+  password: employee123
+
+Suggested demo flow for presentation
+------------------------------------
+1. Login as admin or manager.
+2. Show the dashboard and sidebar.
+3. Open Vendors -> add one vendor -> show vendor table.
+4. Open Requisitions -> create a requisition -> show PENDING status.
+5. Open Purchase Orders -> create a PO -> show PENDING status.
+6. Open Approvals -> demonstrate Approve/Reject buttons if approval records exist.
+7. Return to dashboard and explain that the UI is Thymeleaf integrated with Spring Boot backend.
+
+The frontend is NOT a separate React application. It is the existing Spring Boot + Thymeleaf frontend, redesigned with CSS.

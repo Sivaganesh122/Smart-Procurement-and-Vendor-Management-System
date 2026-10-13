@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Purchase Orders | Smart Procurement</title><link rel="stylesheet" th:href="@{/css/style.css}"></head>
+<body><div class="app-shell">
+<aside class="sidebar"><div class="brand"><div class="brand-row"><span class="brand-mark">SP</span><div><h1>Smart Procurement</h1><p>Vendor Management System</p></div></div></div>
+<nav class="nav">
+    <a th:href="@{/dashboard}"><span class="nav-icon">⌂</span><span class="nav-text">Dashboard</span></a>
+    <a sec:authorize="hasAnyRole('ADMIN','PROCUREMENT_MANAGER')" th:href="@{/vendor}"><span class="nav-icon">▣</span><span class="nav-text">Vendors</span></a>
+    <a sec:authorize="hasAnyRole('ADMIN','EMPLOYEE','PROCUREMENT_MANAGER')" th:href="@{/requisition}"><span class="nav-icon">☷</span><span class="nav-text">Requisitions</span></a>
+    <a class="active" sec:authorize="hasAnyRole('ADMIN','PROCUREMENT_MANAGER')" th:href="@{/purchase-order}"><span class="nav-icon">▤</span><span class="nav-text">Purchase Orders</span></a>
+    <a sec:authorize="hasAnyRole('ADMIN','PROCUREMENT_MANAGER')" th:href="@{/approval}"><span class="nav-icon">✓</span><span class="nav-text">Approvals</span></a>
+</nav>
+<div class="sidebar-bottom">
+    <div class="user-mini">
+        <strong sec:authentication="name">User</strong>
+        <span>Signed in</span>
+    </div>
+    <form th:action="@{/logout}" method="post"><button class="btn btn-secondary" style="width:100%;justify-content:center;">Logout</button></form>
+</div>
+</aside>
+<main class="main"><header class="topbar"><div><h2>Purchase Orders</h2><small>Manage purchase workflow</small></div><a class="btn btn-secondary" th:href="@{/dashboard}">← Dashboard</a></header>
+<div class="content"><div class="page-head"><h2>Purchase Order Management</h2><p>Generate purchase orders, assign verified suppliers, specify products, and monitor approval progress.</p></div>
+<div class="card form-card"><div class="section-head"><h3>Create Purchase Order</h3><span class="muted">New procurement order</span></div>
+<form th:action="@{/purchase-order}" method="post">
+    <div class="form-grid">
+        <div class="field"><label>PO Number</label><input type="text" name="poNumber" placeholder="PO-2026-001" required></div>
+        <div class="field"><label>Assign Vendor</label>
+            <select name="vendorId" required>
+                <option value="" disabled selected>-- Select Supplier --</option>
+                <option th:each="v : ${vendors}" th:value="${v.id}" th:text="${v.name} + (${v.contactNumber != null ? ' - ' + v.contactNumber : (v.email != null ? ' - ' + v.email : '')})">Supplier</option>
+            </select>
+        </div>
+        <div class="field full"><label>Product / Item Name</label><input type="text" name="productName" placeholder="e.g. Dell PowerEdge Server" required></div>
+        <div class="field"><label>Quantity</label><input type="number" name="quantity" min="1" value="1" required></div>
+        <div class="field"><label>Unit Price ($)</label><input type="number" step="0.01" min="0" name="unitPrice" placeholder="0.00" value="0.00" required></div>
+    </div>
+    <div class="form-actions"><button class="btn btn-primary" type="submit">＋ Create Purchase Order</button></div>
+</form>
+</div>
+<div class="section-head"><h3>All Purchase Orders</h3><span class="muted" th:text="${#lists.size(orders)} + ' order(s)'">0 orders</span></div>
+<div class="card table-card"><div class="table-wrap"><table>
+<thead>
+    <tr>
+        <th>ID</th>
+        <th>PO Number</th>
+        <th>Vendor</th>
+        <th>Product / Item</th>
+        <th>Qty</th>
+        <th>Unit Price</th>
+        <th>Total Value</th>
+        <th>Created At</th>
+        <th>Status</th>
+    </tr>
+</thead>
+<tbody>
+<tr th:each="po : ${orders}">
+    <td th:text="${po.id}">1</td>
+    <td><strong th:text="${po.poNumber}">PO</strong></td>
+    <td>
+        <div th:if="${po.vendor != null}">
+            <strong th:text="${po.vendor.name}">Vendor</strong>
+            <div class="muted" style="font-size:11px;" th:if="${po.vendor.contactNumber != null}" th:text="${po.vendor.contactNumber}"></div>
+        </div>
+        <span th:if="${po.vendor == null}" class="muted">Unassigned</span>
+    </td>
+    <td>
+        <div th:each="item : ${po.items}">
+            <span th:text="${item.productName != null ? item.productName : (item.itemName != null ? item.itemName : 'Item')}">Product</span>
+        </div>
+        <span th:if="${#lists.isEmpty(po.items)}" class="muted">No items</span>
+    </td>
+    <td>
+        <span th:each="item : ${po.items}" th:text="${item.quantity}">1</span>
+        <span th:if="${#lists.isEmpty(po.items)}" class="muted">-</span>
+    </td>
+    <td>
+        <span th:each="item : ${po.items}" th:text="'$' + ${#numbers.formatDecimal(item.unitPrice, 1, 2)}">$0.00</span>
+        <span th:if="${#lists.isEmpty(po.items)}" class="muted">-</span>
+    </td>
+    <td>
+        <span th:each="item : ${po.items}" th:text="'$' + ${#numbers.formatDecimal(item.quantity * item.unitPrice, 1, 2)}">$0.00</span>
+        <span th:if="${#lists.isEmpty(po.items)}" class="muted">-</span>
+    </td>
+    <td>
+        <span th:text="${po.createdAt != null ? #temporals.format(po.createdAt, 'yyyy-MM-dd HH:mm') : '-'}">-</span>
+    </td>
+    <td>
+        <span class="badge"
+              th:classappend="${po.status == 'APPROVED'} ? ' badge-approved' : (${po.status == 'REJECTED'} ? ' badge-rejected' : ' badge-pending')"
+              th:text="${po.status}">PENDING</span>
+    </td>
+</tr>
+<tr th:if="${#lists.isEmpty(orders)}"><td colspan="9" class="empty">No purchase orders created yet.</td></tr>
+</tbody></table></div></div>
+</div></main></div></body></html>
