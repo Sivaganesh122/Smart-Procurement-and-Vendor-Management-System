@@ -2,6 +2,7 @@ package com.procurement.procurement.controller.web;
 
 import com.procurement.procurement.entity.vendor.Vendor;
 import com.procurement.procurement.service.vendor.VendorService;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -41,6 +42,7 @@ public class VendorWebController {
     }
 
     // ===================== Delete Vendor =====================
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/delete/{id}")
     public String deleteVendor(@PathVariable Long id) {
 

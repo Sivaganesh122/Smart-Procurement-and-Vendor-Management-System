@@ -72,7 +72,7 @@
                            th:href="@{'/api/reports/vendor/' + ${vendor.id} + '?format=excel'}">
                             Excel
                         </a>
-                        <a class="btn btn-danger"
+                        <a sec:authorize="hasRole('ADMIN')" class="btn btn-danger"
                            th:href="@{'/vendor/delete/' + ${vendor.id}}">
                             Delete
                         </a>
