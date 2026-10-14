@@ -8,11 +8,13 @@ import com.procurement.procurement.repository.procurement.ApprovalRepository;
 import com.procurement.procurement.repository.procurement.PurchaseOrderRepository;
 import com.procurement.procurement.repository.procurement.RequisitionRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
+@Transactional
 public class ApprovalService {
 
     private final ApprovalRepository approvalRepository;

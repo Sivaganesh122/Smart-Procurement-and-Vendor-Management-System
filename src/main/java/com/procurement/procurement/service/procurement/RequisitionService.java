@@ -93,7 +93,11 @@ public class RequisitionService {
     }
 
     public List<Requisition> getAllRequisitions() {
-        return requisitionRepository.findAll();
+        List<Requisition> list = requisitionRepository.findAll();
+        for (Requisition req : list) {
+            syncRequisitionStatusWithApproval(req);
+        }
+        return list;
     }
 
     public List<Requisition> getMyRequisitions() {
@@ -104,10 +108,28 @@ public class RequisitionService {
         User currentUser = userRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        return requisitionRepository.findByRequestedBy(currentUser);
+        List<Requisition> list = requisitionRepository.findByRequestedBy(currentUser);
+        for (Requisition req : list) {
+            syncRequisitionStatusWithApproval(req);
+        }
+        return list;
     }
 
     public List<Requisition> getRequisitionsByStatus(String status) {
         return requisitionRepository.findByStatus(status);
+    }
+
+    private void syncRequisitionStatusWithApproval(Requisition req) {
+        if (req != null && req.getId() != null) {
+            List<Approval> approvals = approvalService.getApprovalsByRequisitionId(req.getId());
+            if (approvals != null && !approvals.isEmpty()) {
+                Approval latestApproval = approvals.get(approvals.size() - 1);
+                if (latestApproval.getStatus() != null && !latestApproval.getStatus().equalsIgnoreCase(req.getStatus())) {
+                    req.setStatus(latestApproval.getStatus());
+                    req.setUpdatedAt(LocalDateTime.now());
+                    requisitionRepository.save(req);
+                }
+            }
+        }
     }
 }
