@@ -2,6 +2,7 @@ package com.procurement.procurement.security;
 
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
@@ -11,12 +12,14 @@ import java.util.Date;
 @Component
 public class JwtUtil {
 
-    private final String SECRET =
-            "mySecretKeymySecretKeymySecretKeymySecretKey";
-    private final long EXPIRATION = 1000 * 60 * 60; // 1 hour
+    @Value("${jwt.secret:mySecretKeymySecretKeymySecretKeymySecretKey}")
+    private String secret;
+
+    @Value("${jwt.expiration:3600000}")
+    private long expiration; // 1 hour (in ms)
 
     private Key getSignKey() {
-        return Keys.hmacShaKeyFor(SECRET.getBytes());
+        return Keys.hmacShaKeyFor(secret.getBytes());
     }
 
     public String generateToken(UserDetails userDetails) {
@@ -25,7 +28,7 @@ public class JwtUtil {
                 .setSubject(userDetails.getUsername())
                 .setIssuedAt(new Date())
                 .setExpiration(
-                        new Date(System.currentTimeMillis() + EXPIRATION))
+                        new Date(System.currentTimeMillis() + expiration))
                 .signWith(getSignKey(), SignatureAlgorithm.HS256)
                 .compact();
     }

@@ -1,25 +1,30 @@
+# Maven build output
 target/
 !.mvn/wrapper/maven-wrapper.jar
-!**/src/main/**/target/
-!**/src/test/**/target/
 
-### IDE files ###
+# IDE files
 .idea/
-*.iws
-*.iml
-*.ipr
 .vscode/
+*.iml
+*.iws
+*.ipr
 .classpath
 .project
 .settings/
 .springBeans
 .sts4-cache/
 
-### Operating System ###
-.DS_Store
-Thumbs.db
+# Environment variables and local configuration
+.env
+.env.*
+!.env.example
+application-local.properties
 
-### Logs & Temp ###
+# Logs
 *.log
 *.tmp
 *.bak
+
+# Operating system files
+.DS_Store
+Thumbs.db
