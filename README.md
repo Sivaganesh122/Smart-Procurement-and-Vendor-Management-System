@@ -67,8 +67,3 @@ mvn clean spring-boot:run
 | **Admin** | `admin` | `admin123` |
 | **Manager** | `manager` | `manager123` |
 | **Employee** | `employee` | `employee123` |
-
----
-
-## 📄 License
-This project is licensed under the MIT License - see the [MIT_License](MIT_License) file for details.
