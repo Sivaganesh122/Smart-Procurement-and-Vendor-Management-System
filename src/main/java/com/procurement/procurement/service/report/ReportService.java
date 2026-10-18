@@ -29,19 +29,23 @@ public class ReportService {
     }
 
     public byte[] generateVendorReport(Long vendorId, String format) {
+        Vendor vendor = vendorRepository.findById(vendorId)
+                .orElseThrow(() -> new RuntimeException("Vendor not found with id: " + vendorId));
+        return exportVendorsReport(Collections.singletonList(vendor), "Vendor Information Report", format);
+    }
 
+    public byte[] generateAllVendorsReport(String format) {
+        List<Vendor> vendors = vendorRepository.findAll();
+        return exportVendorsReport(vendors, "All Vendors Report", format);
+    }
+
+    private byte[] exportVendorsReport(List<Vendor> vendors, String title, String format) {
         try {
-            // Fetch only the selected vendor from the database.
-            Vendor vendor = vendorRepository.findById(vendorId)
-                    .orElseThrow(() -> new RuntimeException("Vendor not found"));
-
-            // JasperReports expects a collection as its data source.
-            List<Vendor> vendors = Collections.singletonList(vendor);
             JRBeanCollectionDataSource dataSource =
                     new JRBeanCollectionDataSource(vendors);
 
             Map<String, Object> parameters = new HashMap<>();
-            parameters.put("title", "Vendor Information Report");
+            parameters.put("title", title);
 
             InputStream reportStream =
                     new ClassPathResource("jasper/vendor_report.jrxml")
@@ -57,7 +61,7 @@ public class ReportService {
                     dataSource
             );
 
-            // Export to Excel.
+            // Export to Excel
             if ("excel".equalsIgnoreCase(format)) {
                 JRXlsxExporter exporter = new JRXlsxExporter();
                 ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
@@ -71,7 +75,7 @@ public class ReportService {
                 return outputStream.toByteArray();
             }
 
-            // Export to PDF by default.
+            // Export to PDF by default
             return JasperExportManager.exportReportToPdf(jasperPrint);
 
         } catch (Exception e) {
